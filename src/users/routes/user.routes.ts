@@ -1,9 +1,9 @@
-import {Router, Request, Response, NextFunction} from "express";
+import {Router} from "express";
 import {UserController} from "../controller/user.controller";
 
 const router = Router();
 const controller = new UserController();
 
-router.get("/email/:email", (req: Request, res: Response, next: NextFunction) => controller.findByEmail(req, res, next));
+router.get("/email/:email", controller.findByEmail.bind(controller));
 
 export const userRoutes = router;
