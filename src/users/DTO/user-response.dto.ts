@@ -1,4 +1,4 @@
-export interface UserResponseDto{
+export interface UserResponseDTO{
      name: string
      email: string
 }
