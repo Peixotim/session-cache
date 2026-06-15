@@ -1,4 +1,4 @@
-import {CreateUserDTO } from "../DTO/create-user.dto";
+import {CreateUserDTO } from "../DTOs/create-user.dto";
 import {User} from "../model/user.entity";
 import {AppDataSource} from "../../../infra/database/database";
 

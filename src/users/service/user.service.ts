@@ -1,68 +1,64 @@
 import {UserRepository} from "../repository/user.repository";
-import {UserResponseDTO} from "../DTO/user-response.dto";
-import {CreateUserDTO} from "../DTO/create-user.dto";
-import {ArgonService} from "../../login/service/argon.service";
+import {UserResponseDTO} from "../DTOs/user-response.dto";
+import {CreateUserDTO} from "../DTOs/create-user.dto";
+import {ArgonService} from "../../auth/service/argon.service";
 import {User} from "../model/user.entity";
 import {AppError, BadRequestError, ConflictError, InternalServerError, NotFoundError} from "../../shared/errors";
-import {Not} from "typeorm";
 
-export class UserService{
+export class UserService {
     private repository = new UserRepository()
     private argonService = new ArgonService()
 
-    public async create(payload: CreateUserDTO): Promise<UserResponseDTO>{
-        try{
-
-            if(!payload){
-                throw new BadRequestError("O payload do usuário é obrigatório.");
+    public async create(payload: CreateUserDTO): Promise<UserResponseDTO> {
+        try {
+            if (!payload) {
+                throw new BadRequestError("User payload is required.")
             }
 
-            if(await this.repository.findByEmail(payload.email) != null){
-                throw new ConflictError("Já existe um usuário cadastrado com este e-mail.");
+            if (await this.repository.findByEmail(payload.email) != null) {
+                throw new ConflictError("A user with this email already exists.")
             }
 
-            const hash : string = await this.argonService.hash(payload.password);
-            const newUser : User = await this.repository.create({
+            const hash: string = await this.argonService.hash(payload.password)
+            const newUser: User = await this.repository.create({
                 name: payload.name,
                 email: payload.email,
-                password: hash
+                password: hash,
             })
 
-            return {
-                name: newUser.name,
-                email: newUser.email
-            }
-
-        }catch(error){
-
-            if (error instanceof AppError) {
-                throw error;
-            }
-
-            console.error("[UserService.create] Erro inesperado:", error);
-            throw new InternalServerError("Não foi possível criar o usuário.");
+            return { name: newUser.name, email: newUser.email }
+        } catch (error) {
+            if (error instanceof AppError) throw error;
+            console.error("[UserService.create] Unexpected error:", error)
+            throw new InternalServerError("Failed to create user.")
         }
     }
 
-    public async findByEmail(email : string): Promise<UserResponseDTO>{
-        try{
-            const user : User | null = await this.repository.findByEmail(email);
-            if(!user){
-                throw new NotFoundError("Not Found User")
+    public async getByEmail(email: string): Promise<User> {
+        try {
+            const user: User | null = await this.repository.findByEmail(email)
+            if (user == null) {
+                throw new NotFoundError("User not found.")
             }
+            return user
+        } catch (error) {
+            if (error instanceof AppError) throw error;
+            console.error("[UserService.getByEmail] Unexpected error:", error)
+            throw new InternalServerError("Failed to retrieve user.")
+        }
+    }
 
-            return {
-                name: user.name,
-                email: user.email
+    public async findByEmail(email: string): Promise<UserResponseDTO> {
+        try {
+            const user: User | null = await this.repository.findByEmail(email)
+            if (!user) {
+                throw new NotFoundError("User not found.")
             }
-        }catch(error){
-
-            if (error instanceof AppError) {
-                throw error;
-            }
-
-            console.error("[UserService.create] Erro inesperado:", error);
-            throw new InternalServerError("Not Found User");
+            return { name: user.name, email: user.email }
+        } catch (error) {
+            if (error instanceof AppError) throw error;
+            console.error("[UserService.findByEmail] Unexpected error:", error)
+            throw new InternalServerError("Failed to retrieve user.")
         }
     }
 }

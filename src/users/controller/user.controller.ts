@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import {UserService} from "../service/user.service";
-import {UserResponseDTO} from "../DTO/user-response.dto";
+import {UserResponseDTO} from "../DTOs/user-response.dto";
 
 export class UserController {
     private service = new UserService();
