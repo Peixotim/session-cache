@@ -1,8 +1,8 @@
 import {Request, Response} from "express";
-import {configDotenv} from "dotenv";
-import {HttpStatus} from "../../../../shared/errors";
 
-configDotenv();
+import {HttpStatus} from "../../../../shared/errors";
+import {env} from "../../../../shared/env/env";
+
 
 interface HealthResponseDTO {
     status: "OK";
@@ -18,7 +18,7 @@ export class HealthController {
         return res.status(HttpStatus.OK).json({
             status: "OK",
             timestamp: new Date().toISOString(),
-            environment: process.env.NODE_ENV,
+            environment: env.NODE_ENV,
         })
     }
 }
