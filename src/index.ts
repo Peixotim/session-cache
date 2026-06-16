@@ -3,6 +3,7 @@ import { AppDataSource } from '../infra/database/database'
 import "reflect-metadata"
 import { errorHandler, notFoundHandler } from './shared/middlewares'
 import { routes } from './routes'
+import redis from "../infra/database/redis";
 
 const app = express();
 app.use(express.json())
@@ -15,11 +16,19 @@ app.use(errorHandler)
 async function bootStrap(){
     try{
         await AppDataSource.initialize()
+        await redis.ping();
         app.listen(8080,()  => {
             console.log('Api is running in port 8080')
         })
     }catch(error){
-        console.error(error);
+        const message = error instanceof Error ? error.message : String(error)
+
+        console.error(`Failed to start the application: ${message}`)
+        if (error instanceof Error && error.stack) {
+            console.error(error.stack)
+        }
+
+        process.exit(1)
     }
 }
 
