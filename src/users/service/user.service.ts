@@ -5,6 +5,7 @@ import {ArgonService} from "../../auth/service/argon.service";
 import {User} from "../model/user.entity";
 import {AppError, BadRequestError, ConflictError, InternalServerError, NotFoundError} from "../../shared/errors";
 
+
 export class UserService {
     private repository = new UserRepository()
     private argonService = new ArgonService()
@@ -26,7 +27,11 @@ export class UserService {
                 password: hash,
             })
 
-            return { name: newUser.name, email: newUser.email }
+            return {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email
+            }
         } catch (error) {
             if (error instanceof AppError) throw error;
             console.error("[UserService.create] Unexpected error:", error)
@@ -54,11 +59,41 @@ export class UserService {
             if (!user) {
                 throw new NotFoundError("User not found.")
             }
-            return { name: user.name, email: user.email }
+
+            return {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
+
         } catch (error) {
             if (error instanceof AppError) throw error;
             console.error("[UserService.findByEmail] Unexpected error:", error)
             throw new InternalServerError("Failed to retrieve user.")
         }
+    }
+
+    public async findById(id : string):Promise<UserResponseDTO>{
+        try{
+            const user: User | null = await this.repository.findById(id)
+
+            if (!user) {
+                throw new NotFoundError("User not found.")
+            }
+
+            return {
+                id: user.id,
+                name: user.name,
+                email: user.email
+            }
+
+        }catch (error) {
+            if (error instanceof AppError) throw error;
+            console.error("[UserService.findById] Unexpected error:", error)
+            throw new InternalServerError("Failed to retrieve user.")
+        }
+    }
+    public async getProfile(id: string): Promise<UserResponseDTO> {
+        return this.findById(id)
     }
 }
