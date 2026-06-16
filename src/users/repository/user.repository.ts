@@ -19,4 +19,10 @@ export class UserRepository{
             where:{email}
         })
     }
+
+    public async findById(id : string) : Promise<User | null>{
+        return await this.repository.findOne({
+            where:{id}
+        })
+    }
 }
